@@ -1,13 +1,22 @@
 const Telegraf = require('telegraf');
 const { Extra, Markup } = require('telegraf');
-var http = require('http');
-var MongoClient = require('mongodb').MongoClient;
+const http = require('http');
+const MongoClient = require('mongodb').MongoClient;
+const Route = require('../models/route');
+const rankHandler = require('../handlers/rankHandler');
 
-module.exports = function(bot, source){
+module.exports = function(bot){
 
     bot.action(/end(.+)/, function(ctx) {
 
+        var source = ctx.callbackQuery.data.split(':')[2];
         var destination = ctx.callbackQuery.data.split(':')[1];
+        var routes = new Array();
+        //var busesToTake = new Array();
+
+        if (source === destination){
+            return ctx.reply('Are you trying to trick me? That\'s not funny');
+        };
 
         MongoClient.connect('mongodb://localhost/orbitalBot', function(err, db) {
 
@@ -15,43 +24,59 @@ module.exports = function(bot, source){
 
             db.collection("busstops").findOne({name: source}).then(function(result) {
 
-                var busesToTake = new Array();
                 result.buses.forEach(function(bus){
-                    if (bus.busStops.indexOf(destination) !== -1 && bus.busStops.indexOf(source) < bus.busStops.indexOf(destination)){
-                        busesToTake.push(bus.name);                 
+
+                    var indexSource = bus.busStops.indexOf(source);
+                    var indexDestination = bus.busStops.indexOf(destination);
+
+                    if (indexDestination !== -1 && indexSource < indexDestination){
+
+                        //busesToTake.push(bus.name);
+
+                        var numStops = indexDestination - indexSource;
+                        //insert arrival time function after its done
+                        var waitingTime = Math.floor((Math.random() * 10) + 1);
+                        var travelTime = waitingTime + 2*numStops;
+                        
+                        routes.push(new Route({
+                            bus: bus.name,
+                            message: `Take bus ${bus.name} to ${destination}, reaching in 15 minutes`,
+                            waitingTime: waitingTime,
+                            travelTime: travelTime
+                        }));               
                     };
+
                 });
 
-                if (busesToTake.length !== 0){
+                var newRoutes = rankHandler(routes);
+
+                if (newRoutes.length === 0){
+                    ctx.reply('No direct buses available!');
+
+                } else {
 
                     var possibleRoutes = "";
-                    busesToTake.forEach(function(bus){
-                    possibleRoutes += `Take bus ${bus} to ${destination}, reaching in 15 minutes\n`;
+                    var rank = 1;
+
+                    newRoutes.forEach(function(route) {
+        
+                        possibleRoutes += `${rank}. Take bus ${route.bus} to ${destination}, reaching in ${route.waitingTime} minutes. Total travelling time is ${route.travelTime} minutes!\n`;
+                        rank++;
+
                     });
                     ctx.reply(possibleRoutes);
 
-                    db.collection("busstops").findOne({name: destination}).then(function(result) {
-                    ctx.reply('The waiting time is long! \n' + result.description);
+                    db.collection("busstops").findOne({name: source}).then(function(result) {
+                        ctx.reply('The waiting time is long! \n' + result.description);
                     });
-                
-                } else {
-                    ctx.reply('No direct buses available!');
-                };
-                
-                db.close();
-            
-            });
-            
-        });
-/*
-        const destination = ctx.callbackQuery.data.split(':')[1];
-        orbitalBot.getCollection('busstops').findOne({name: source}).then(function(result){
-            console.log(result);
-        })
-        return ctx.reply(`1. Take bus A1 to PGP then take either A1 or D2 to S17, reaching in 3 mins\n2. Take bus A2 to LT29, reaching in 10 mins`
-        );
-*/
 
+                }
+
+                db.close();
+            });
+
+        });
+            
     });
 
 };

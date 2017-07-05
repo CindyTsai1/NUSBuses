@@ -5,6 +5,8 @@ module.exports = function(bot){
 
     bot.command('start', function(ctx) {
 
+        console.log('starting new route...');
+
         ctx.reply('Where are you my dear?',
             Extra.markup((markup) => {
                 return markup.resize().keyboard([
@@ -33,7 +35,7 @@ module.exports = function(bot){
                     Markup.callbackButton('Opp Block EA', 'start:Opp Block EA')], 
                     [Markup.callbackButton('Opp Hon Sui Sen Memorial Library', 'start:Opp Hon Sui Sen Memorial Library'), 
                     Markup.callbackButton('Opp Kent Ridge MRT', 'start:Opp Kent Ridge MRT')], 
-                    [Markup.callbackButton('NUSS', 'start:NUSS'),
+                    [Markup.callbackButton('Opp NUSS', 'start:Opp NUSS'),
                     Markup.callbackButton('Opp PGP House 12', 'start:Opp PGP House 12')],
                     [Markup.callbackButton('Opp University Hall', 'start:Opp University Hall'),
                     Markup.callbackButton('Opp University Health Centre', 'start:Opp University Health Centre')],
