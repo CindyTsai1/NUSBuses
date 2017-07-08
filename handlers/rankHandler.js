@@ -8,15 +8,9 @@ module.exports = function(routes){
 
 function compare(a,b) {
 
-    if (a.travelTime < b.travelTime)
-        return -1;
-    if (a.travelTime > b.travelTime)
-        return 1;
-    if (a.travelTime === b.travelTime) {
-         if (a.waitingTime < b.waitingTime)
-            return -1;
-        else
-            return 1;
-    }
+    if (a.travelTime === b.travelTime)
+         return a.waitingTime - b.waitingTime;
+    
+    return a.travelTime - b.travelTime;
        
-}
+};
