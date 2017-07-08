@@ -40,7 +40,7 @@ module.exports = function(bot){
                         
                         routes.push(new Route({
                             bus: bus.name,
-                            message: `Take bus ${bus.name} to ${destination}, reaching in 15 minutes`,
+                            message: `Take bus ${bus.name} to ${destination}, reaching in ${travelTime} minutes`,
                             waitingTime: waitingTime,
                             travelTime: travelTime
                         }));               
