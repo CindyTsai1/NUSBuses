@@ -25,27 +25,44 @@ module.exports = function(bot){
             db.collection("busstops").findOne({name: source}).then(function(result) {
 
                 result.buses.forEach(function(bus){
-
+                     
+                    //if destination not found, search the opposite route;
+                    if (bus.busStops.indexOf(destination) === -1){
+                        source = source.oppBusStops;
+                        bus = bus.oppBus;
+                    };
+                    
                     var indexSource = bus.busStops.indexOf(source);
                     var indexDestination = bus.busStops.indexOf(destination);
+                    //insert arrival time function after its done
+                    var waitingTime = Math.floor((Math.random() * 10) + 1);
+                    
+                    //busesToTake.push(bus.name);//I think don't need;
 
-                    if (indexDestination !== -1 && indexSource < indexDestination){
-
-                        //busesToTake.push(bus.name);
-
-                        var numStops = indexDestination - indexSource;
-                        //insert arrival time function after its done
-                        var waitingTime = Math.floor((Math.random() * 10) + 1);
-                        var travelTime = waitingTime + 2*numStops;
+                    var numStops = indexDestination - indexSource;
+                    
+                    //if indexDestination is before indexSource and the starting terminal is the same as the ending terminal, check the number of stops if the bus reach destination and continue
+                    if(numStops < 0 && bus.busStops[0] === bus.busStops[bus.busStops.length-1]){
+                        numStops = bus.busStops.length + numStops;
+                        //waitingTime2 is for the bus at the terminal
+                        var waitingTime2 = Math.floor((Math.random() * 10) + 1);
+                        var travelTime = waitingTime + waitingTime2 + 2*numStops;
                         
                         routes.push(new Route({
                             bus: bus.name,
-                            message: `Take bus ${bus.name} to ${destination}, reaching in ${travelTime} minutes`,
-                            waitingTime: waitingTime,
+                            message: `Take bus ${bus.name} to ${bus.busStops[bus.busStops.length - 1].name}, reaching in ${waitingTime} minutes, and take the same bus again, reaching in ${waitingTime2}.`,
                             travelTime: travelTime
-                        }));               
+                        }));
+                        
+                    }else if(numStops > 0){
+                        travelTime = waitingTime + 2*numStops;
+                        
+                        routes.push(new Route({
+                            bus: bus.name,
+                            message: `Take bus ${bus.name} to ${destination}, reaching in ${waitingTime} minutes.`,
+                            travelTime: travelTime
+                        }));
                     };
-
                 });
 
                 var newRoutes = rankHandler(routes);
@@ -60,7 +77,7 @@ module.exports = function(bot){
 
                     newRoutes.forEach(function(route) {
         
-                        possibleRoutes += `${rank}. Take bus ${route.bus} to ${destination}, reaching in ${route.waitingTime} minutes. Total travelling time is ${route.travelTime} minutes!\n`;
+                        possibleRoutes += `${rank}.` + route.message + `Total travelling time is ${route.travelTime} minutes!\n`;
                         rank++;
 
                     });
