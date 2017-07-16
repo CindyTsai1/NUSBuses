@@ -18,7 +18,7 @@ module.exports = function(bot){
             return ctx.reply('Are you trying to trick me? That\'s not funny');
         };
 
-        MongoClient.connect('mongodb://localhost/orbitalBot', function(err, db) {
+        MongoClient.connect('mongodb://rebstan97:orbitalbus@ds151232.mlab.com:51232/orbitalbot', function(err, db) {
 
             if (err) throw err;
 
@@ -33,7 +33,9 @@ module.exports = function(bot){
                     };
                     
                     var indexSource = bus.busStops.indexOf(source);
+                    console.log(indexSource);
                     var indexDestination = bus.busStops.indexOf(destination);
+                    console.log(indexDestination);
                     //insert arrival time function after its done
                     var waitingTime = Math.floor((Math.random() * 10) + 1);
                     
@@ -74,6 +76,7 @@ module.exports = function(bot){
 
                     var possibleRoutes = "";
                     var rank = 1;
+                    var shortestWait = newRoutes[0].travelTime;
 
                     newRoutes.forEach(function(route) {
         
@@ -84,7 +87,11 @@ module.exports = function(bot){
                     ctx.reply(possibleRoutes);
 
                     db.collection("busstops").findOne({name: source}).then(function(result) {
-                        ctx.reply('The waiting time is long! \n' + result.description);
+                         if (shortestWait >= 6) {
+                             ctx.reply('The waiting time is long! \n' + result.description);
+                         } else {
+                             ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
+                         }
                     });
 
                 }
