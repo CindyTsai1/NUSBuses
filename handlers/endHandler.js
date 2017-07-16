@@ -52,7 +52,7 @@ module.exports = function(bot){
                         
                         routes.push(new Route({
                             bus: bus.name,
-                            message: `Take bus ${bus.name} to ${bus.busStops[bus.busStops.length - 1].name}, reaching in ${waitingTime} minutes, and take the same bus again, reaching in ${waitingTime2}.`,
+                            message: `Take bus ${bus.name} to ${bus.busStops[(bus.busStops.length) - 1].name}, reaching in ${waitingTime} minutes, and take the same bus again, reaching in ${waitingTime2}.`,
                             travelTime: travelTime
                         }));
                         
