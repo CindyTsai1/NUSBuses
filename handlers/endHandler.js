@@ -44,7 +44,7 @@ module.exports = function(bot){
                     var numStops = indexDestination - indexSource;
                     
                     //if indexDestination is before indexSource and the starting terminal is the same as the ending terminal, check the number of stops if the bus reach destination and continue
-                    if(numStops < 0 && bus.busStops[0] === bus.busStops[bus.busStops.length-1]){
+                    if(numStops < 0 && bus.busStops[0] === bus.busStops[(bus.busStops.length)-1]){
                         numStops = bus.busStops.length + numStops;
                         //waitingTime2 is for the bus at the terminal
                         var waitingTime2 = Math.floor((Math.random() * 10) + 1);
