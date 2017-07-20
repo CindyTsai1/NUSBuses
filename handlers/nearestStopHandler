@@ -2,44 +2,44 @@ const Telegraf = require('telegraf');
 const { Extra, Markup } = require('telegraf');
 const http = require('http');
 const MongoClient = require('mongodb').MongoClient;
-const Route = require('../models/route');
-const startHandler = require('../handlers/startHandler');
+const startHandler = require('./startHandler');
 
 module.exports = function(bot){
 
-    bot.action(/find(.+)/, function(ctx) {
+    bot.on('location', function(ctx) {
 
-        var message = ctx.callbackQuery.data.split(':')[1];
-        
-        var latitude = message.location.latitude;
-        var longitude = message.location.longitude;
-        var smallestDistance = 0;
-        var nearestBusStop = new String();
-        
+        var latitude = ctx.message.location.latitude;
+        var longitude = ctx.message.location.longitude;
+        var smallestDistance = Number.MAX_VALUE;
+
         MongoClient.connect('mongodb://rebstan97:orbitalbus@ds151232.mlab.com:51232/orbitalbot', function(err, db) {
 
             if (err) throw err;
 
-            db.collection("busstops").find().forEach(function(busStops){
+            var nearestStop;
+
+            db.collection("busstops").find().forEach(function(result){          
                 
-                var distance = Math.pow(busStops.latitude - latitude, 2) + Math.pow(busStops.longtitude - longtitude, 2);
+                var distance = Math.pow(result.latitude - latitude, 2) + Math.pow(result.longitude - longitude, 2);
                 
-                if(distance < smallestDistance){
+                if (distance < smallestDistance){
                     smallestDistance = distance;
-                    nearestBusStop = busStops.name;
+                    nearestStop = result.name;
                 };
                 
-                db.close();
-                
-             });
-             
-            ctx.reply('My dear, your nearest bus stop is ${nearestBusStop}',
-                Markup.inlineKeyboard([Markup.callbackButton('${nearestBusStop}, 'end:${nearestBusStop}')])
+            });
+
+            ctx.reply(`My dear, the nearest bus stop is ${nearestStop}`,
+                Markup.inlineKeyboard([
+                    [Markup.callbackButton(`${nearestStop}`, `start:${nearestStop}`)]
+                ]).extra()
             );
-        
-            return startHandler(bot);
-        
-        });
+
+            startHandler(bot);
+
+            db.close();
+
+        })
         
     });
     
