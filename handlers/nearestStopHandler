@@ -34,7 +34,7 @@ module.exports = function(bot){
              });
              
             ctx.reply('My dear, your nearest bus stop is ${nearestBusStop}',
-                Markup.inlineKeyboard([Markup.callbackButton(nearestBusStop, `end:${nearestBusStop}`)])
+                Markup.inlineKeyboard([Markup.callbackButton('${nearestBusStop}, `end:${nearestBusStop}`)])
             );
         
             return endHandler(bot);
