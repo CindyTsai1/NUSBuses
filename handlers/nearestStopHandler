@@ -14,7 +14,7 @@ module.exports = function(bot){
         var latitude = message.location.latitude;
         var longitude = message.location.longitude;
         var smallestDistance = 0;
-        var nearestBusStop = new Array();
+        var nearestBusStop = new String();
         
         MongoClient.connect('mongodb://rebstan97:orbitalbus@ds151232.mlab.com:51232/orbitalbot', function(err, db) {
 
@@ -24,19 +24,17 @@ module.exports = function(bot){
                 
                 var distance = Math.pow(busStops.latitude - latitude, 2) + Math.pow(busStops.longtitude - longtitude, 2);
                 
-                if(distance < smallest distance){
-                    smallest distance = distance;
-                    nearestBusStop.push(busStops.name);
+                if(distance < smallestDistance){
+                    smallestDistance = distance;
+                    nearestBusStop = busStops.name;
                 };
                 
                 db.close();
                 
              });
              
-            var starting = nearestBusStop[(nearestBusStop.length) - 1];
-             
-            ctx.reply('My dear, your nearest bus stop is ' + starting,
-                Markup.inlineKeyboard([Markup.callbackButton(starting, `end:starting:${source}`)])
+            ctx.reply('My dear, your nearest bus stop is ' + nearestBusStop,
+                Markup.inlineKeyboard([Markup.callbackButton(nearestBusStop, `end:nearestBusStop:${source}`)])
             );
         
             return endHandler(bot);
