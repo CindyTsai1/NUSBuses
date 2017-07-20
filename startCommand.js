@@ -10,7 +10,7 @@ module.exports = function(bot){
         ctx.reply('Where are you my dear?',
             Extra.markup((markup) => {
                 return markup.resize().keyboard([
-                markup.locationRequestButton('Find my location')
+                markup.locationRequestButton('Find my location', 'find:location')
                 ]);
             })
         ).then(function(){
