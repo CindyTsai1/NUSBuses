@@ -12,7 +12,6 @@ module.exports = function(bot){
         var source = ctx.callbackQuery.data.split(':')[2];
         var destination = ctx.callbackQuery.data.split(':')[1];
         var routes = new Array();
-        //var busesToTake = new Array();
 
         if (source === destination){
             return ctx.reply('Are you trying to trick me? That\'s not funny');
@@ -25,46 +24,25 @@ module.exports = function(bot){
             db.collection("busstops").findOne({name: source}).then(function(result) {
 
                 result.buses.forEach(function(bus){
-                     
-                    //if destination not found, search the opposite route;
-                    if (bus.busStops.indexOf(destination) === -1){
-                        source = source.oppBusStops;
-                        bus = bus.oppBus;
-                    };
-                    
-                    var indexSource = bus.busStops.indexOf(source);
-                    console.log(indexSource);
-                    var indexDestination = bus.busStops.indexOf(destination);
-                    console.log(indexDestination);
-                    //insert arrival time function after its done
-                    var waitingTime = Math.floor((Math.random() * 10) + 1);
-                    
-                    //busesToTake.push(bus.name);//I think don't need;
 
-                    var numStops = indexDestination - indexSource;
-                    
-                    //if indexDestination is before indexSource and the starting terminal is the same as the ending terminal, check the number of stops if the bus reach destination and continue
-                    if(numStops < 0 && bus.busStops[0] === bus.busStops[(bus.busStops.length)-1]){
-                        numStops = bus.busStops.length + numStops;
-                        //waitingTime2 is for the bus at the terminal
-                        var waitingTime2 = Math.floor((Math.random() * 10) + 1);
-                        var travelTime = waitingTime + waitingTime2 + 2*numStops;
-                        
+                    var indexSource = bus.busStops.indexOf(source);
+                    var indexDestination = bus.busStops.indexOf(destination);
+
+                    if (indexDestination !== -1 && indexSource < indexDestination){
+
+                        var numStops = indexDestination - indexSource;
+                        //insert arrival time function after its done
+                        var waitingTime = Math.floor((Math.random() * 10) + 1);
+                        var travelTime = waitingTime + 2*numStops;
+
                         routes.push(new Route({
                             bus: bus.name,
-                            message: `Take bus ${bus.name} to ${bus.busStops[(bus.busStops.length) - 1].name}, reaching in ${waitingTime} minutes, and take the same bus again, reaching in ${waitingTime2}.`,
+                            waitingTime: waitingTime,
                             travelTime: travelTime
-                        }));
-                        
-                    }else if(numStops > 0){
-                        travelTime = waitingTime + 2*numStops;
-                        
-                        routes.push(new Route({
-                            bus: bus.name,
-                            message: `Take bus ${bus.name} to ${destination}, reaching in ${waitingTime} minutes.`,
-                            travelTime: travelTime
-                        }));
-                    };
+                        })); 
+             
+                    }
+
                 });
 
                 var newRoutes = rankHandler(routes);
@@ -76,22 +54,28 @@ module.exports = function(bot){
 
                     var possibleRoutes = "";
                     var rank = 1;
-                    var shortestWait = newRoutes[0].travelTime;
+                    var shortestWait = 20;
 
                     newRoutes.forEach(function(route) {
-        
-                        possibleRoutes += `${rank}.` + route.message + `Total travelling time is ${route.travelTime} minutes!\n`;
+
+                        if (rank === 1) { shortestWait = route.waitingTime; }
+                        if (rank == 2) { possibleRoutes += '\nAlternative route(s):\n'; }
+                        
+                        possibleRoutes += `Take bus ${route.bus} to ${destination}, reaching in ${route.waitingTime} minutes. Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
                         rank++;
 
                     });
+
                     ctx.reply(possibleRoutes);
 
                     db.collection("busstops").findOne({name: source}).then(function(result) {
-                         if (shortestWait >= 6) {
-                             ctx.reply('The waiting time is long! \n' + result.description);
-                         } else {
-                             ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
-                         }
+
+                        if (shortestWait >= 6) {
+                            ctx.reply('The waiting time is long! \n' + result.description);
+                        } else {
+                            ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
+                        }
+                        
                     });
 
                 }
