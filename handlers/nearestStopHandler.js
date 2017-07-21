@@ -11,34 +11,37 @@ module.exports = function(bot){
         var latitude = ctx.message.location.latitude;
         var longitude = ctx.message.location.longitude;
         var smallestDistance = Number.MAX_VALUE;
+        var nearestStop;
 
         MongoClient.connect('mongodb://rebstan97:orbitalbus@ds151232.mlab.com:51232/orbitalbot', function(err, db) {
 
             if (err) throw err;
 
-            var nearestStop;
+            db.collection("busstops").findOne({name: 'All Bus Stops'}).then(function(result){
 
-            db.collection("busstops").find().forEach(function(result){          
-                
-                var distance = Math.pow(result.latitude - latitude, 2) + Math.pow(result.longitude - longitude, 2);
-                
-                if (distance < smallestDistance){
-                    smallestDistance = distance;
-                    nearestStop = result.name;
-                };
-                
+                result.busStops.forEach(function(stop) {
+
+                    var distance = Math.pow(stop.latitude - latitude, 2) + Math.pow(stop.longitude - longitude, 2);
+            
+                    if (distance < smallestDistance){
+                        smallestDistance = distance;
+                        nearestStop = stop.name;
+                    };  
+
+                });
+
+                ctx.reply(`My dear, the nearest bus stop is ${nearestStop}`,
+                    Markup.inlineKeyboard([
+                        [Markup.callbackButton(`${nearestStop}`, `start:${nearestStop}`)]
+                    ]).extra()
+                );
+
+                db.close();
+
             });
 
-            ctx.reply(`My dear, the nearest bus stop is ${nearestStop}`,
-                Markup.inlineKeyboard([
-                    [Markup.callbackButton(`${nearestStop}`, `start:${nearestStop}`)]
-                ]).extra()
-            );
-
-            startHandler(bot);
-
-            db.close();
-
+           startHandler(bot);
+           
         })
         
     });
