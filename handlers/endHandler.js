@@ -12,7 +12,6 @@ module.exports = function(bot){
         var source = ctx.callbackQuery.data.split(':')[2];
         var destination = ctx.callbackQuery.data.split(':')[1];
         var routes = new Array();
-        //var busesToTake = new Array();
 
         if (source === destination){
             return ctx.reply('Are you trying to trick me? That\'s not funny');
@@ -33,13 +32,10 @@ module.exports = function(bot){
                     };
                     
                     var indexSource = bus.busStops.indexOf(source);
-                    console.log(indexSource);
                     var indexDestination = bus.busStops.indexOf(destination);
-                    console.log(indexDestination);
+
                     //insert arrival time function after its done
                     var waitingTime = Math.floor((Math.random() * 10) + 1);
-                    
-                    //busesToTake.push(bus.name);//I think don't need;
 
                     var numStops = indexDestination - indexSource;
                     
@@ -56,7 +52,7 @@ module.exports = function(bot){
                             travelTime: travelTime
                         }));
                         
-                    }else if(numStops > 0){
+                    } else if(numStops > 0) {
                         travelTime = waitingTime + 2*numStops;
                         
                         routes.push(new Route({
