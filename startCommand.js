@@ -1,46 +1,45 @@
 const Telegraf = require('telegraf');
 const { Extra, Markup } = require('telegraf');
+const startHandler = require('../handlers/startHandler');
 
 module.exports = function(bot){
 
     bot.command('start', function(ctx) {
 
-        console.log('starting new route...');
-
         ctx.reply('Where are you my dear?',
             Extra.markup((markup) => {
                 return markup.resize().keyboard([
-                markup.locationRequestButton('Find my location')
+                markup.locationRequestButton('What\'s the nearest bus stop near me? ')
                 ]);
             })
         ).then(function(){
 
-            return ctx.reply('Select where you are at or allow us to find your location',
+            return ctx.reply('Select where you are at or allow us to find your nearest bus stop',
                 Markup.inlineKeyboard([
-                    [Markup.callbackButton('Arts & Social Sciences', 'buttons:fass'),
-                    Markup.callbackButton('Botanic Gardens Campus', 'buttons:btc')],
-                    [Markup.callbackButton('Business', 'buttons:business'),
-                    Markup.callbackButton('Central Forum', 'buttons:clb')],
-                    [Markup.callbackButton('Computing', 'buttons:computing'),
-                    Markup.callbackButton('Engineering', 'buttons:engine')],
-                    [Markup.callbackButton('Kent Ridge MRT', 'buttons:kr'),
-                    Markup.callbackButton('Prince George\'s Park', 'buttons:pgp')],
-                    [Markup.callbackButton('Science', 'buttons:science'),
-                    Markup.callbackButton('University Health Centre', 'buttons:uhc')],
-                    [Markup.callbackButton('Yusof Ishak House', 'buttons:yih'),
+                    [Markup.callbackButton('Arts & Social Sciences', 'buttonsStart:fass'),
+                    Markup.callbackButton('Bukit Timah Campus', 'buttonsStart:btc')],
+                    [Markup.callbackButton('Business', 'buttonsStart:business'),
+                    Markup.callbackButton('Central Forum', 'buttonsStart:clb')],
+                    [Markup.callbackButton('Computing', 'buttonsStart:computing'),
+                    Markup.callbackButton('Engineering', 'buttonsStart:engine')],
+                    [Markup.callbackButton('Kent Ridge MRT', 'buttonsStart:kr'),
+                    Markup.callbackButton('Prince George\'s Park', 'buttonsStart:pgp')],
+                    [Markup.callbackButton('Science', 'buttonsStart:science'),
+                    Markup.callbackButton('University Health Centre', 'buttonsStart:uhc')],
+                    [Markup.callbackButton('Yusof Ishak House', 'buttonsStart:yih'),
                     Markup.callbackButton('University Town', 'start:University Town')],
-                    [Markup.callbackButton('Others', 'buttons:others')]
+                    [Markup.callbackButton('Others', 'buttonsStart:others')]
                 ]).extra()
             );
         });
     });
 
-    bot.action(/buttons(.+)/, function(ctx) {
+    bot.action(/buttonsStart(.+)/, function(ctx) {
 
-        var faculty = ctx.callbackQuery.data.split(':')[1];
+        var region = ctx.callbackQuery.data.split(':')[1];
 
-        if (faculty === 'fass') {
-            ctx.reply('Select a bus stop',
+        if (region === 'fass') {
+            return ctx.reply('Select a bus stop',
                 Markup.inlineKeyboard([
                     [Markup.callbackButton('AS7', 'start:AS7')],
                     [Markup.callbackButton('LT13', 'start:LT13')],
@@ -49,8 +48,8 @@ module.exports = function(bot){
             );
         } 
 
-        if (faculty === 'btc') {
-            ctx.reply('Select a bus stop',
+        if (region === 'btc') {
+            return ctx.reply('Select a bus stop',
                 Markup.inlineKeyboard([
                     [Markup.callbackButton('Botanic Gardens MRT', 'start:Botanic Gardens MRT')], 
                     [Markup.callbackButton('BTC - Oei Tiong Ham', 'start:BTC')],
@@ -59,8 +58,8 @@ module.exports = function(bot){
             );
         }
 
-        if (faculty === 'business') {
-            ctx.reply('Select a bus stop',
+        if (region === 'business') {
+            return ctx.reply('Select a bus stop',
                 Markup.inlineKeyboard([
                     [Markup.callbackButton('BIZ2', 'start:BIZ2')],
                     [Markup.callbackButton('Opp Hon Sui Sen Memorial Library', 'start:Opp Hon Sui Sen Memorial Library')]
@@ -68,8 +67,8 @@ module.exports = function(bot){
             );
         }
 
-        if (faculty === 'clb') {
-            ctx.reply('Select a bus stop',
+        if (region === 'clb') {
+            return ctx.reply('Select a bus stop',
                 Markup.inlineKeyboard([
                     [Markup.callbackButton('Central Library', 'start:Central Library')],
                     [Markup.callbackButton('Computer Centre', 'start:Computer Centre')] 
@@ -77,16 +76,16 @@ module.exports = function(bot){
             );
         }
 
-        if (faculty === 'computing') {
-            ctx.reply('Select a bus stop',
+        if (region === 'computing') {
+            return ctx.reply('Select a bus stop',
                 Markup.inlineKeyboard([
                     [Markup.callbackButton('COM2', 'start:COM2')]
                 ]).extra()
             );
         }
 
-        if (faculty === 'engineering') {
-            ctx.reply('Select a bus stop',
+        if (region === 'engine') {
+            return ctx.reply('Select a bus stop',
                 Markup.inlineKeyboard([
                     [Markup.callbackButton('Block EA', 'start:Block EA')],
                     [Markup.callbackButton('Opp Block EA', 'start:Opp Block EA')] 
@@ -94,8 +93,8 @@ module.exports = function(bot){
             );
         }
 
-        if (faculty === 'kr') {
-            ctx.reply('Select a bus stop',
+        if (region === 'kr') {
+            return ctx.reply('Select a bus stop',
                 Markup.inlineKeyboard([
                     [Markup.callbackButton('Kent Ridge MRT', 'start:Kent Ridge MRT')],
                     [Markup.callbackButton('Opp Kent Ridge MRT', 'start:Opp Kent Ridge MRT')]
@@ -103,11 +102,12 @@ module.exports = function(bot){
             );
         }
 
-        if (faculty === 'pgp') {
-            ctx.reply('Select a bus stop',
+        if (region === 'pgp') {
+            return ctx.reply('Select a bus stop',
                 Markup.inlineKeyboard([
                     [Markup.callbackButton('Prince George\'s Park', 'start:Prince George\'s Park')],
                     [Markup.callbackButton('Prince George\'s Park Residences', 'start:Prince George\'s Park Residences')],
+                    [Markup.callbackButton('PGP House 7', 'start:PGP House 7')],
                     [Markup.callbackButton('PGP House 12', 'start:PGP House 12')],
                     [Markup.callbackButton('Opp PGP House 12', 'start:Opp PGP House 12')],
                     [Markup.callbackButton('PGP House 14 and 15', 'start:PGP House 14 and 15')]
@@ -115,8 +115,8 @@ module.exports = function(bot){
             );
         }
 
-        if (faculty === 'science') {
-            ctx.reply('Select a bus stop',
+        if (region === 'science') {
+            return ctx.reply('Select a bus stop',
                 Markup.inlineKeyboard([
                     [Markup.callbackButton('LT29', 'start:LT29')], 
                     [Markup.callbackButton('S17', 'start:S17')]
@@ -124,8 +124,8 @@ module.exports = function(bot){
             );
         }
 
-        if (faculty === 'uhc') {
-            ctx.reply('Select a bus stop',
+        if (region === 'uhc') {
+            return ctx.reply('Select a bus stop',
                 Markup.inlineKeyboard([
                     [Markup.callbackButton('University Health Centre', 'start:University Health Centre')],
                     [Markup.callbackButton('Opp University Health Centre', 'start:Opp University Health Centre')]
@@ -133,16 +133,16 @@ module.exports = function(bot){
             );
         }
 
-        if (faculty === 'yih') {
-            ctx.reply('Select a bus stop',
+        if (region === 'yih') {
+            return ctx.reply('Select a bus stop',
                 Markup.inlineKeyboard([
-                    [Markup.callbackButton('Yusof Ishak House', 'start:Yusof Ishak House')]
+                    [Markup.callbackButton('Yusof Ishak House', 'start:Yusof Ishak House')],
                     [Markup.callbackButton('Opp Yusof Ishak House', 'start:Opp Yusof Ishak House')]
                 ]).extra()
             );
         }
 
-        if (faculty === 'others') {
+        if (region === 'others') {
             return ctx.reply('Select a bus stop or allow us to find your location',
                 Markup.inlineKeyboard([      
                     [Markup.callbackButton('Kent Ridge Bus Terminal', 'start:Kent Ridge Bus Terminal')],      
@@ -157,7 +157,3 @@ module.exports = function(bot){
         }
     });
 }
-
-             
-
-
