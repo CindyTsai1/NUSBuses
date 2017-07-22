@@ -36,15 +36,14 @@ module.exports = function(bot){
                 });
                 
                 if (nearestStop.length == 2){
-                    ctx.reply(`My dear, the nearest bus stops are $(nearestStop[0]) and ${nearestStop[1]}. They are within the same distance from you. Which one do you want to go?`,
+                    return ctx.reply(`My dear, the nearest bus stops are $(nearestStop[0]) and ${nearestStop[1]}. They are within the same distance from you. Which one do you want to go?`,
                         Markup.inlineKeyboard([
-                            [Markup.callbackButton(`${nearestStop[0]}`, `start:${nearestStop[0]}`)]
-                        ],[
-                            [Markup.callbackButton(`${nearestStop[1]}`, `start:${nearestStop[1]}`)]
+                            [Markup.callbackButton('${nearestStop[0]}', `start:${nearestStop[0]}`)],
+                            [Markup.callbackButton('${nearestStop[1]}', `start:${nearestStop[1]}`)]
                         ]).extra()
                      );
                 }else if (nearestStop.length == 1){
-                    ctx.reply(`My dear, the nearest bus stop is ${nearestStop}`,
+                    return ctx.reply(`My dear, the nearest bus stop is ${nearestStop}`,
                         Markup.inlineKeyboard([
                             [Markup.callbackButton(`${nearestStop}`, `start:${nearestStop}`)]
                         ]).extra()
