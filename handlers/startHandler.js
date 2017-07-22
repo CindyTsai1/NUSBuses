@@ -23,7 +23,7 @@ module.exports = function(bot){
                 result.buses.forEach(function(bus) {
                     if(bus.startTime <= hour && hour <= bus.endTime){
                         var arrivalTime = Math.floor((Math.random() * 10) + 1);
-                        arrivalResponse += `${bus.name}         ${arrivalTime} min\n`;
+                        arrivalResponse += `${bus.name2}         ${arrivalTime} min\n`;
                     }else{
                         arrivalResponse += `${bus.name} is not operating now\n`;
                     };
