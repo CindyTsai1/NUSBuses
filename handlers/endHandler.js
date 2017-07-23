@@ -4,6 +4,7 @@ const http = require('http');
 const MongoClient = require('mongodb').MongoClient;
 const Route = require('../models/route');
 const rankHandler = require('../handlers/rankHandler');
+const routeHandler = require('./routeHandler');
 
 module.exports = function(bot){
 
@@ -14,7 +15,10 @@ module.exports = function(bot){
         var routes = new Array();
 
         if (source === destination){
-            return ctx.reply('Are you trying to trick me? That\'s not funny');
+            return ctx.reply('Are you trying to trick me? That\'s not funny', Markup.inlineKeyboard([
+                    Markup.callbackButton('I don\'t know what bus to take. Help me!', `route:${source}`)
+                ]).extra());
+            return routeHandler(bot);
         };
 
         MongoClient.connect('mongodb://rebstan97:orbitalbus@ds151232.mlab.com:51232/orbitalbot', function(err, db) {
@@ -89,7 +93,7 @@ module.exports = function(bot){
                         if (rank === 1) { shortestWait = route.waitingTime; }
                         if (rank == 2) { possibleRoutes += '\nAlternative route(s):\n'; }
                         
-                        possibleRoutes += `Take bus ${route.bus} to ${destination}, reaching in ${route.waitingTime} minutes. Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
+                        possibleRoutes += `${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
                         rank++;
 
                     });
