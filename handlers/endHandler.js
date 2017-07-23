@@ -3,8 +3,8 @@ const { Extra, Markup } = require('telegraf');
 const http = require('http');
 const MongoClient = require('mongodb').MongoClient;
 const Route = require('../models/route');
-const rankHandler = require('../handlers/rankHandler');
-const routeRouteHandler = require('./routeRouteHandler');
+const rankRouteHandler = require('../handlers/rankRouteHandler');
+const routeHandler = require('./routeHandler');
 
 module.exports = function(bot){
 
