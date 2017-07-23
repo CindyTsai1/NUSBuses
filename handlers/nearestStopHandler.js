@@ -41,7 +41,7 @@ module.exports = function(bot){
                 var rankedStops = rankStopHandler(nearestStops);
 
                 if (rankedStops.length === 0) {
-                    ctx.reply(`My dear, there\'s no bus stop near you.`)
+                    ctx.reply(`My dear, there are no bus stops near you.`)
                 }
 
                 if (rankedStops.length === 1) {
