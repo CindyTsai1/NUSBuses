@@ -3,6 +3,9 @@ const { Extra, Markup } = require('telegraf');
 const http = require('http');
 const MongoClient = require('mongodb').MongoClient;
 const startHandler = require('./startHandler');
+const computeDistanceHandler = require('./computeDistanceHandler');
+const NearestStop = require('../models/nearestStop');
+const rankStopHandler = require('./rankStopHandler');
 
 module.exports = function(bot){
 
@@ -11,7 +14,7 @@ module.exports = function(bot){
         var latitude = ctx.message.location.latitude;
         var longitude = ctx.message.location.longitude;
         var smallestDistance = Number.MAX_VALUE;
-        var nearestStop = new Array();
+        var nearestStops = new Array();
 
         MongoClient.connect('mongodb://rebstan97:orbitalbus@ds151232.mlab.com:51232/orbitalbot', function(err, db) {
 
@@ -21,34 +24,52 @@ module.exports = function(bot){
 
                 result.busStops.forEach(function(stop) {
 
-                    var distance = Math.pow(stop.latitude - latitude, 2) + Math.pow(stop.longitude - longitude, 2);
+                    var distance = computeDistanceHandler(latitude, longitude, stop.latitude, stop.longitude);
             
-                    if (distance < smallestDistance){
+                    if (distance <= 0.8 && distance < smallestDistance) {
+
                         smallestDistance = distance;
-                        while(nearestStop.length > 0){
-                            nearestStop.pop();
-                        };
-                        nearestStop.push(stop.name);
-                    }else if(distance == smallestDistance){
-                        nearestStop.push(stop.name);
-                    };
-                       
+                        nearestStops.push(new NearestStop({
+                            name: stop.name,
+                            distance: distance
+                        }));
+
+                    };  
+
                 });
-                
-                if (nearestStop.length == 2){
-                    return ctx.reply(`My dear, the nearest bus stops are $(nearestStop[0]) and ${nearestStop[1]}. They are within the same distance from you. Which one do you want to go?`,
-                        Markup.inlineKeyboard([
-                            [Markup.callbackButton('${nearestStop[0]}', `start:${nearestStop[0]}`)],
-                            [Markup.callbackButton('${nearestStop[1]}', `start:${nearestStop[1]}`)]
-                        ]).extra()
-                     );
-                }else if (nearestStop.length == 1){
-                    return ctx.reply(`My dear, the nearest bus stop is ${nearestStop}`,
-                        Markup.inlineKeyboard([
-                            [Markup.callbackButton(`${nearestStop}`, `start:${nearestStop}`)]
-                        ]).extra()
+
+                var rankedStops = rankStopHandler(nearestStops);
+
+                if (rankedStops.length === 0) {
+                    ctx.reply(`My dear, there\'s no bus stop near you.`)
+                }
+
+                if (rankedStops.length === 1) {
+                    ctx.reply(`My dear, the bus stop nearest to you is ${rankedStops[0]}.`,
+                    Markup.inlineKeyboard([
+                        [Markup.callbackButton(`${rankedStops[0].name}`, `start:${rankedStops[0].name}`)],
+                    ]).extra()
                     );
-                };
+                }
+
+                if (rankedStops.length === 2) {
+                    ctx.reply('My dear, here are the bus stops near you.',
+                    Markup.inlineKeyboard([
+                        [Markup.callbackButton(`${rankedStops[0].name}`, `start:${rankedStops[0].name}`)],
+                        [Markup.callbackButton(`${rankedStops[1].name}`, `start:${rankedStops[1].name}`)]
+                    ]).extra()
+                    );
+                }
+
+                if (rankedStops.length === 3) {
+                    ctx.reply('My dear, here are the bus stops near you.',
+                    Markup.inlineKeyboard([
+                        [Markup.callbackButton(`${rankedStops[0].name}`, `start:${rankedStops[0].name}`)],
+                        [Markup.callbackButton(`${rankedStops[1].name}`, `start:${rankedStops[1].name}`)],
+                        [Markup.callbackButton(`${rankedStops[2].name}`, `start:${rankedStops[2].name}`)]
+                    ]).extra()
+                    );
+                }
 
                 db.close();
 
