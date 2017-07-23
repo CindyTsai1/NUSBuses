@@ -4,7 +4,7 @@ const http = require('http');
 const MongoClient = require('mongodb').MongoClient;
 const Route = require('../models/route');
 const rankHandler = require('../handlers/rankHandler');
-const routeHandler = require('./routeHandler');
+const routeRouteHandler = require('./routeRouteHandler');
 
 module.exports = function(bot){
 
@@ -77,7 +77,7 @@ module.exports = function(bot){
                     };
                 });
 
-                var newRoutes = rankHandler(routes);
+                var newRoutes = rankRouteHandler(routes);
 
                 if (newRoutes.length === 0){
                     ctx.reply('No direct buses available!');
