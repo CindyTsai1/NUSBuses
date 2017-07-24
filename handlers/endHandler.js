@@ -31,18 +31,17 @@ module.exports = function(bot){
                 result.buses.forEach(function(bus){
 
                     var indexDestination = bus.busStops.indexOf(destination);
+                    var indexSource = bus.busStops.indexOf(source);
+                    var numStops = indexDestination - indexSource;
                     
                     //if destination is found, search it as normal;
-                    if (indexDestination !== -1){
+                    if (numStops > 0){
                         
                         gotDirect = true;
-                        var indexSource = bus.busStops.indexOf(source);
-                        var numStops = indexDestination - indexSource;
-    
+       
                         //insert arrival time function after its done
                         var waitingTime = Math.floor((Math.random() * 10) + 1);
-                                            
-                        if(numStops > 0) {
+
                             var travelTime = waitingTime + 2*numStops;
                             
                             routes.push(new Route({
@@ -52,7 +51,6 @@ module.exports = function(bot){
                                 waitingTime: waitingTime
                             }));
                         
-                        }  
                     }     
                 });
 
@@ -91,17 +89,15 @@ module.exports = function(bot){
                         result.buses.forEach(function(bus){
                      
                             var indexDestination = bus.busStops.indexOf(destination);
-                    
+                            var indexSource = bus.busStops.indexOf(oppSource);
+                            var numStops = indexDestination - indexSource;
+                            
                             //if destination is found, search it as normal;
-                            if (indexDestination !== -1){
-
-                                var indexSource = bus.busStops.indexOf(oppSource);
-                                var numStops = indexDestination - indexSource;
-        
+                            if (numStops > 0){
+                                
                                 //insert arrival time function after its done
                                 var waitingTime = Math.floor((Math.random() * 10) + 1);
                                                     
-                                if(numStops > 0) {
                                     var travelTime = waitingTime + 2*numStops;
                                     
                                     routes.push(new Route({
@@ -112,7 +108,7 @@ module.exports = function(bot){
                                     }));
                                 
                                 }
-                            }
+
                         });          
                                                                   
                         var newRoutes = rankRouteHandler(routes);
