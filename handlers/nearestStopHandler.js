@@ -57,7 +57,7 @@ module.exports = function(bot){
                         ]).extra());
                 }
 
-                if (rankedStops.length > 3) {
+                if (rankedStops.length >== 3) {
                     ctx.reply('My dear, here are the bus stops near you (ranked with distance in ascending order).',
                         Markup.inlineKeyboard([
                             [Markup.callbackButton(`${rankedStops[0].name}`, `start:${rankedStops[0].name}`)],
