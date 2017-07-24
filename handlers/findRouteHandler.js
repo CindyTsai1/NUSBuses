@@ -20,7 +20,9 @@ module.exports = function(routes, indexSource, indexDestination){
             travelTime: travelTime
         }));
     
-    }else{
+    }
+    
+    /*else{
         if(indexDestination <== 4){
             numStops = bus.busStops.length + numStops;
             
@@ -69,4 +71,5 @@ module.exports = function(routes, indexSource, indexDestination){
             };
         };
     };
+    */
 };
