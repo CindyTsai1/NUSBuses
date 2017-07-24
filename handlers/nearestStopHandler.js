@@ -26,21 +26,13 @@ module.exports = function(bot){
 
                     var distance = computeDistanceHandler(latitude, longitude, stop.latitude, stop.longitude);
                     
-                    if (distance <= 0.8 && distance < smallestDistance) {
-                        smallestDistance = distance;
+                    if (distance <= 0.8) {
                         nearestStops.push(new NearestStop({
                             name: stop.name,
                             distance: distance
                         }));
-
                     }
                     
-                    /*
-                    nearestStops.push(new NearestStop({
-                            name: stop.name,
-                            distance: distance
-                    }));
-                    */
                 });
 
                 var rankedStops = rankStopHandler(nearestStops);
@@ -65,7 +57,7 @@ module.exports = function(bot){
                         ]).extra());
                 }
 
-                if (rankedStops.length === 3) {
+                if (rankedStops.length > 3) {
                     ctx.reply('My dear, here are the bus stops near you (ranked with distance in ascending order).',
                         Markup.inlineKeyboard([
                             [Markup.callbackButton(`${rankedStops[0].name}`, `start:${rankedStops[0].name}`)],
@@ -74,29 +66,6 @@ module.exports = function(bot){
                         ]).extra()
                      );
                 }
-                
-                /*
-                if(rankedStops[0] > 0.8){
-                    ctx.reply(`My dear, there are no bus stops near you.`);
-                }else if(rankedStops[1] > 0.8){
-                    ctx.reply(`My dear, the bus stop nearest to you is ${rankedStops[0]}.`,
-                        Markup.inlineKeyboard([
-                            [Markup.callbackButton(`${rankedStops[0].name}`, `start:${rankedStops[0].name}`)],
-                        ]).extra()
-                     );
-                }else{
-                    ctx.reply('My dear, here are the bus stops near you (ranked with distance in ascending order).');
-                    for(i = 0; i < 3; i++){
-                        if(rankedStops[i] <= 0.8){
-                            ctx.reply(
-                                Markup.inlineKeyboard([
-                                    [Markup.callbackButton(`${rankedStops[i].name}`, `start:${rankedStops[i].name}`)],
-                                ]).extra()
-                            );
-                        };
-                    };
-                };
-                */
                 
                 db.close();
 
