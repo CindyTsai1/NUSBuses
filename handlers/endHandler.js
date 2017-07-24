@@ -46,7 +46,7 @@ module.exports = function(bot){
                     
                 } else if (newRoutes.length === 1){
                     var shortestWait = newRoutes[0].waitingTime;
-                    ctx.reply('${newRoutes[0].message} Total time needed to get to ${destination} is ${newRoute[0].travelTime} minutes!`);
+                    ctx.reply(`${newRoutes[0].message} Total time needed to get to ${destination} is ${newRoute[0].travelTime} minutes!`);
 
                 } else {
 
@@ -55,7 +55,7 @@ module.exports = function(bot){
                     
                     newRoutes.forEach(function(route) {
                         
-                        if(rank === 2){possibleRoutes += '\nAlternative route(s):\n';}
+                        if(rank === 2){possibleRoutes += '\nAlternative route(s):\n';};
                         
                         possibleRoutes += `${rank}. ${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
                         rank++;
