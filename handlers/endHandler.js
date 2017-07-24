@@ -24,21 +24,38 @@ module.exports = function(bot){
         MongoClient.connect('mongodb://rebstan97:orbitalbus@ds151232.mlab.com:51232/orbitalbot', function(err, db) {
 
             if (err) throw err;
-
+            var indexDestination;
+            
             db.collection("busstops").findOne({name: source}).then(function(result) {
 
                 result.buses.forEach(function(bus){
-                     
+                    indexDestination = bus.busStops.indexOf(destination);
+                    
                     //if destination is found, search it as normal;
-                    if (bus.busStops.indexOf(destination) !== -1){
+                    if (indexDestination !== -1){
                         var indexSource = bus.busStops.indexOf(source);
-                        var indexDestination = bus.busStops.indexOf(destination);
-                        routes = findRouteHandler(routes, indexSource, indexDestination);
-                    }
-                    //should we find opposite bus stops
-                        
+                        routes = findRouteHandler(routes, indexSource, indexDestination);  
+                    };     
                 });
+            });
+            
+            if(indexDestination === -1){
+                source = source.oppBusStop;
+                db.collection("busstops").findOne({name: source}).then(function(result) {
 
+                    result.buses.forEach(function(bus){
+                     
+                        //if destination is found, search it as normal;
+                        if (bus.busStops.indexOf(destination) !== -1){
+                            var indexSource = bus.busStops.indexOf(source);
+                            indexDestination = bus.busStops.indexOf(destination);
+                            routes = findRouteHandler(routes, indexSource, indexDestination);
+                        }
+                    }); 
+                });
+            };
+                                                                   
+                                                                  
                 var newRoutes = rankRouteHandler(routes);
 
                 if (newRoutes.length === 0){
