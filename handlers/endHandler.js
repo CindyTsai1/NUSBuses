@@ -117,17 +117,18 @@ module.exports = function(bot){
         MongoClient.connect('mongodb://rebstan97:orbitalbus@ds151232.mlab.com:51232/orbitalbot', function(err, db) {
 
             if (err) throw err;
-            var indexDestination;
+            var gotDirect = false;
             
             db.collection("busstops").findOne({name: source}).then(function(result) {
 
                 result.buses.forEach(function(bus){
 
-                    indexDestination = bus.busStops.indexOf(destination);
+                    var indexDestination = bus.busStops.indexOf(destination);
                     
                     //if destination is found, search it as normal;
                     if (indexDestination !== -1){
-
+                        
+                        gotDirect = true;
                         var indexSource = bus.busStops.indexOf(source);
                         var numStops = indexDestination - indexSource;
     
@@ -174,7 +175,7 @@ module.exports = function(bot){
 
                         }
 
-                if(indexDestination === -1) {
+                if(gotDirect === false) {
 
                     var oppSource = result.oppBusStop;
 
@@ -182,7 +183,7 @@ module.exports = function(bot){
 
                         result.buses.forEach(function(bus){
                      
-                            indexDestination = bus.busStops.indexOf(destination);
+                            var indexDestination = bus.busStops.indexOf(destination);
                     
                             //if destination is found, search it as normal;
                             if (indexDestination !== -1){
