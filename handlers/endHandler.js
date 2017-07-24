@@ -43,19 +43,21 @@ module.exports = function(bot){
 
                 if (newRoutes.length === 0){
                     ctx.reply('No direct buses available!');
+                    
+                } else if (newRoutes.length === 1){
+                    var shortestWait = newRoutes[0].waitingTime;
+                    ctx.reply('${newRoutes[0].message} Total time needed to get to ${destination} is ${newRoute[0].travelTime} minutes!`);
 
                 } else {
 
                     var possibleRoutes = "";
                     var rank = 1;
-                    var shortestWait = newRoutes[0].waitingTime;
-
+                    
                     newRoutes.forEach(function(route) {
-
-                        //if (rank === 1) { shortestWait = route.waitingTime; }
-                        if (rank === 2) { possibleRoutes += '\nAlternative route(s):\n'; }
                         
-                        possibleRoutes += `${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
+                        if(rank === 2){possibleRoutes += '\nAlternative route(s):\n';}
+                        
+                        possibleRoutes += `${rank}. ${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
                         rank++;
 
                     });
