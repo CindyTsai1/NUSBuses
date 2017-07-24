@@ -35,7 +35,20 @@ module.exports = function(bot){
                     //if destination is found, search it as normal;
                     if (indexDestination !== -1){
                         var indexSource = bus.busStops.indexOf(source);
-                        routes = findRouteHandler(routes, indexSource, indexDestination);  
+                        var numStops = indexDestination - indexSource;
+    
+                        //insert arrival time function after its done
+                        var waitingTime = Math.floor((Math.random() * 10) + 1);
+                        
+                        if(numStops > 0) {
+                            var travelTime = waitingTime + 2*numStops;
+        
+                            routes.push(new Route({
+                                bus: bus.name,
+                                message: `Take bus ${bus.name} to ${destination}, reaching in ${waitingTime} minutes.`,
+                                travelTime: travelTime
+                            })); 
+                        };
                     };     
                 });
             });
@@ -47,14 +60,25 @@ module.exports = function(bot){
                     result.buses.forEach(function(bus){
                      
                         //if destination is found, search it as normal;
-                        if (bus.busStops.indexOf(destination) !== -1){
-                            var indexSource = bus.busStops.indexOf(source);
-                            indexDestination = bus.busStops.indexOf(destination);
-                            routes = findRouteHandler(routes, indexSource, indexDestination);
-                        }
-                    }); 
+                    if (indexDestination !== -1){
+                        var indexSource = bus.busStops.indexOf(source);
+                        var numStops = indexDestination - indexSource;
+    
+                        //insert arrival time function after its done
+                        var waitingTime = Math.floor((Math.random() * 10) + 1);
+                        
+                        if(numStops > 0) {
+                            var travelTime = waitingTime + 2*numStops;
+        
+                            routes.push(new Route({
+                                bus: bus.name,
+                                message: `Take bus ${bus.name} to ${destination}, reaching in ${waitingTime} minutes.`,
+                                travelTime: travelTime
+                            })); 
+                        };
+                    };     
                 });
-            };
+            });
                                                                    
                                                                   
                 var newRoutes = rankRouteHandler(routes);
