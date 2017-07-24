@@ -5,6 +5,7 @@ const MongoClient = require('mongodb').MongoClient;
 const Route = require('../models/route');
 const rankRouteHandler = require('../handlers/rankRouteHandler');
 const routeHandler = require('./routeHandler');
+const findRouteHandler = require('./findRouteHandler');
 
 module.exports = function(bot){
 
