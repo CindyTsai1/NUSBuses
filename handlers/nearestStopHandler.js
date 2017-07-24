@@ -26,7 +26,7 @@ module.exports = function(bot){
 
                     var distance = computeDistanceHandler(latitude, longitude, stop.latitude, stop.longitude);
                     
-                    if (distance <= 0.8) {
+                    if (distance <== 0.8) {
                         nearestStops.push(new NearestStop({
                             name: stop.name,
                             distance: distance
