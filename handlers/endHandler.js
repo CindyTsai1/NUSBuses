@@ -147,6 +147,41 @@ module.exports = function(bot){
                     }     
                 });
 
+                var newRoutes = rankRouteHandler(routes);
+
+                        if (newRoutes.length === 0){
+                            ctx.reply('No direct buses available!');
+                            
+                        } else if (newRoutes.length === 1){
+                            var shortestWait = newRoutes[0].waitingTime;
+                            ctx.reply(`${newRoutes[0].message} Total time needed to get to ${destination} is ${newRoute[0].travelTime} minutes!`);
+
+                        } else {
+
+                            var possibleRoutes = "";
+                            var rank = 1;
+                            
+                            newRoutes.forEach(function(route) {
+                                
+                                if(rank === 2){possibleRoutes += '\nAlternative route(s):\n';};
+                                
+                                possibleRoutes += `${rank}. ${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
+                                rank++;
+
+                            });
+                            
+                            ctx.reply(possibleRoutes);
+
+                            db.collection("busstops").findOne({name: source}).then(function(result) {
+                                if (shortestWait >= 6) {
+                                    ctx.reply('The waiting time is long! \n' + result.description);
+                                } else {
+                                    ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
+                                }
+                            });
+
+                        }
+
                 if(indexDestination === -1) {
 
                     var oppSource = result.oppBusStop;
@@ -155,70 +190,68 @@ module.exports = function(bot){
 
                         result.buses.forEach(function(bus){
                      
-                        //if destination is found, search it as normal;
-                        if (bus.busStops.indexOf(destination) !== -1){
-                            var indexSource = bus.busStops.indexOf(oppSource);
-                            indexDestination = bus.busStops.indexOf(destination);
-                            var numStops = indexDestination - indexSource;
-    
-                            //insert arrival time function after its done
-                            var waitingTime = Math.floor((Math.random() * 10) + 1);
-                                                
-                            if(numStops > 0) {
-                                var travelTime = waitingTime + 2*numStops;
+                            //if destination is found, search it as normal;
+                            if (bus.busStops.indexOf(destination) !== -1){
+                                var indexSource = bus.busStops.indexOf(oppSource);
+                                indexDestination = bus.busStops.indexOf(destination);
+                                var numStops = indexDestination - indexSource;
+        
+                                //insert arrival time function after its done
+                                var waitingTime = Math.floor((Math.random() * 10) + 1);
+                                                    
+                                if(numStops > 0) {
+                                    var travelTime = waitingTime + 2*numStops;
+                                    
+                                    routes.push(new Route({
+                                        bus: bus.name,
+                                        message: `Go to ${oppSource}. Take bus ${bus.name} to ${destination}, reaching in ${waitingTime} minutes.`,
+                                        travelTime: travelTime
+                                    }));
                                 
-                                routes.push(new Route({
-                                    bus: bus.name,
-                                    message: `Go to ${oppSource}. Take bus ${bus.name} to ${destination}, reaching in ${waitingTime} minutes.`,
-                                    travelTime: travelTime
-                                }));
-                            
+                                }
                             }
-                        }
-                    }); 
-                            
+                        });          
                                                                   
-            var newRoutes = rankRouteHandler(routes);
+                        var newRoutes = rankRouteHandler(routes);
 
-            if (newRoutes.length === 0){
-                ctx.reply('No direct buses available!');
-                
-            } else if (newRoutes.length === 1){
-                var shortestWait = newRoutes[0].waitingTime;
-                ctx.reply(`${newRoutes[0].message} Total time needed to get to ${destination} is ${newRoute[0].travelTime} minutes!`);
+                        if (newRoutes.length === 0){
+                            ctx.reply('No direct buses available!');
+                            
+                        } else if (newRoutes.length === 1){
+                            var shortestWait = newRoutes[0].waitingTime;
+                            ctx.reply(`${newRoutes[0].message} Total time needed to get to ${destination} is ${newRoute[0].travelTime} minutes!`);
 
-            } else {
+                        } else {
 
-                var possibleRoutes = "";
-                var rank = 1;
-                
-                newRoutes.forEach(function(route) {
-                    
-                    if(rank === 2){possibleRoutes += '\nAlternative route(s):\n';};
-                    
-                    possibleRoutes += `${rank}. ${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
-                    rank++;
+                            var possibleRoutes = "";
+                            var rank = 1;
+                            
+                            newRoutes.forEach(function(route) {
+                                
+                                if(rank === 2){possibleRoutes += '\nAlternative route(s):\n';};
+                                
+                                possibleRoutes += `${rank}. ${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
+                                rank++;
 
-                });
-                
-                ctx.reply(possibleRoutes);
+                            });
+                            
+                            ctx.reply(possibleRoutes);
 
-                db.collection("busstops").findOne({name: source}).then(function(result) {
-                    if (shortestWait >= 6) {
-                        ctx.reply('The waiting time is long! \n' + result.description);
-                    } else {
-                        ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
-                    }
-                });
+                            db.collection("busstops").findOne({name: source}).then(function(result) {
+                                if (shortestWait >= 6) {
+                                    ctx.reply('The waiting time is long! \n' + result.description);
+                                } else {
+                                    ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
+                                }
+                            });
 
-            }
+                        }
 
-            db.close();
+                        db.close();
+                    });
+                }
+
             });
-            
-            
         });
-
     });
-
 };
