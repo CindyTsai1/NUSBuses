@@ -81,6 +81,8 @@ module.exports = function(bot){
 
                 });
                 
+                db.close();
+                
             });
         
         });
@@ -90,7 +92,7 @@ module.exports = function(bot){
 }
 
                 
-/*
+/*      REPLACE THE CONSOLE.LOG(); IN THE CODE TO PRINT THE RESULT ON BOT (BRACKETS ARE COUNTED ALREADY)
                                                                                   
                     var newRoutes = rankRouteHandler(routes);
 
@@ -122,13 +124,5 @@ module.exports = function(bot){
                         }
 
                     }
-                    
-                });
-
-                db.close();
-            });
-        });
-    });
-};
 
 */
