@@ -2,9 +2,9 @@ const Telegraf = require('telegraf');
 const { Extra, Markup } = require('telegraf');
 const http = require('http');
 const MongoClient = require('mongodb').MongoClient;
-const Route = require('../models/route');
 const rankRouteHandler = require('../handlers/rankRouteHandler');
 const routeHandler = require('./routeHandler');
+const findRouteHandler = require('./findRouteHandler');
 
 module.exports = function(bot){
 
@@ -24,128 +24,109 @@ module.exports = function(bot){
         MongoClient.connect('mongodb://rebstan97:orbitalbus@ds151232.mlab.com:51232/orbitalbot', function(err, db) {
 
             if (err) throw err;
-            var gotDirect = false;
-            
-            db.collection("busstops").findOne({name: source}).then(function(result) {
 
-                result.buses.forEach(function(bus){
+            // Source to destination            
+            db.collection("busstops").findOne({name: source}).then(function(starting) {
 
-                    var indexDestination = bus.busStops.indexOf(destination);
-                    var indexSource = bus.busStops.indexOf(source);
-                    var numStops = indexDestination - indexSource;
-                    
-                    //if destination is found, search it as normal;
-                    if (numStops > 0){
-                        
-                        gotDirect = true;
-       
-                        //insert arrival time function after its done
-                        var waitingTime = Math.floor((Math.random() * 10) + 1);
+                starting.buses.forEach(function(bus){
 
-                            var travelTime = waitingTime + 2*numStops;
-                            
-                            routes.push(new Route({
-                                bus: bus.name,
-                                message: `Take bus ${bus.name} to ${destination}, reaching in ${waitingTime} minutes.`,
-                                travelTime: travelTime,
-                                waitingTime: waitingTime
-                            }));
-                        
-                    }     
+                    routes = findRouteHandler(bus, routes, source, destination);  
+                      
                 });
 
-                var newRoutes = rankRouteHandler(routes);
 
-                        if (newRoutes.length > 0){
-                            var shortestWait = newRoutes[0].waitingTime;
-                            var possibleRoutes = "";
-                            var rank = 1;
+                var oppSource = starting.oppBusStop;
+
+                // Opp source to destination
+                db.collection("busstops").findOne({name: oppSource}).then(function(oppStarting) {
+
+                    if (oppSource !== undefined) {
+
+                        oppStarting.buses.forEach(function(bus){
+                        
+                            routes = findRouteHandler(bus, routes, oppSource, destination);
+
+                        });
+                    }
+
+                    // Source to opp destination
+                    db.collection("busstops").findOne({name: destination}).then(function(ending) {
+
+                        var oppDestination = ending.oppBusStop;
+
+                        if (oppDestination !== undefined) {
+
+                            starting.buses.forEach(function(bus){
                             
-                            newRoutes.forEach(function(route) {
-                                
-                                if(rank === 2){possibleRoutes += '\nAlternative route(s):\n';};
-                                
-                                possibleRoutes += `${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
-                                rank++;
+                                routes = findRouteHandler(bus, routes, source, oppDestination);
 
                             });
-                            
-                            ctx.reply(possibleRoutes);
 
-                            if (shortestWait >= 6) {
-                                ctx.reply('The waiting time is long! \n' + result.description);
-                            } else if (shortestWait < 6){
-                                ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
-                            }
+                            // Opp source to opp destination
+                            db.collection("busstops").findOne({name: oppSource}).then(function(oppStarting) {
 
-                        }
+                                if (oppSource !== undefined) {
 
-                if(gotDirect === false) {
-
-                    var oppSource = result.oppBusStop;
-
-                    db.collection("busstops").findOne({name: oppSource}).then(function(result) {
-
-                        result.buses.forEach(function(bus){
-                     
-                            var indexDestination = bus.busStops.indexOf(destination);
-                            var indexSource = bus.busStops.indexOf(oppSource);
-                            var numStops = indexDestination - indexSource;
-                            
-                            //if destination is found, search it as normal;
-                            if (numStops > 0){
+                                    oppStarting.buses.forEach(function(bus){
                                 
-                                //insert arrival time function after its done
-                                var waitingTime = Math.floor((Math.random() * 10) + 1);
-                                                    
-                                    var travelTime = waitingTime + 2*numStops;
-                                    
-                                    routes.push(new Route({
-                                        bus: bus.name,
-                                        message: `Go to ${oppSource}. Take bus ${bus.name} to ${destination}, reaching in ${waitingTime} minutes.`,
-                                        travelTime: travelTime,
-                                        waitingTime: waitingTime
-                                    }));
-                                
+                                        routes = findRouteHandler(bus, routes, oppSource, oppDestination);
+
+                                    });                                    
+
                                 }
-
-                        });          
-                                                                  
-                        var newRoutes = rankRouteHandler(routes);
-
-                        if (newRoutes.length === 0){
-                            ctx.reply('No direct buses available!');
-                            
-                        } else {
-
-                            var possibleRoutes = "";
-                            var rank = 1;
-                            var shortestWait = newRoutes[0].waitingTime;
-                            
-                            newRoutes.forEach(function(route) {
-                              
-                                if(rank === 2){possibleRoutes += '\nAlternative route(s):\n';};
-                                
-                                possibleRoutes += `${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
-                                rank++;
-
+                                console.log(routes);
                             });
-                            
-                            ctx.reply(possibleRoutes);
-
-                            
-                                if (shortestWait >= 6) {
-                                    ctx.reply('The waiting time is long! \n' + result.description);
-                                } else if(shortestWait < 6){
-                                    ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
-                                }
-
                         }
-                    });
-                };
 
-                        db.close();
                     });
+
+                });
+                
             });
         });
+    });
+}
+
+                
+/*
+                                                                                  
+                    var newRoutes = rankRouteHandler(routes);
+
+                    if (newRoutes.length === 0){
+                        ctx.reply('No direct buses available!');
+                        
+                    } else {
+
+                        var possibleRoutes = "";
+                        var rank = 1;
+                        var shortestWait = newRoutes[0].waitingTime;
+                        
+                        newRoutes.forEach(function(route) {
+                            
+                            if(rank === 2){possibleRoutes += '\nAlternative route(s):\n';}
+                            
+                            possibleRoutes += `${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
+                            rank++;
+
+                        });
+                        
+                        ctx.reply(possibleRoutes);
+                        
+                        if (shortestWait >= 6) {
+                            ctx.reply('The waiting time is long! \n' + result.description);
+                            
+                        } else if (shortestWait < 6) {
+                            ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
+                        }
+
+                    }
+                    
+                });
+
+                db.close();
+            });
+        });
+    });
 };
+
+*/
