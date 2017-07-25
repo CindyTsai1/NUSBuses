@@ -25,66 +25,68 @@ module.exports = function(bot){
 
             if (err) throw err;
 
-            // Source to destination            
-            db.collection("busstops").findOne({name: source}).then(function(starting) {
-
-                starting.buses.forEach(function(bus){
-
-                    routes = findRouteHandler(bus, routes, source, destination);  
-                      
-                });
-
-
-                var oppSource = starting.oppBusStop;
-
-                // Opp source to destination
-                db.collection("busstops").findOne({name: oppSource}).then(function(oppStarting) {
-
-                    if (oppSource !== undefined) {
-
-                        oppStarting.buses.forEach(function(bus){
                         
-                            routes = findRouteHandler(bus, routes, oppSource, destination);
+            db.collection("busstops").findOne({name: source}).then(function(starting) {
+                
+                var oppSource = starting.oppBusStop;
+                
+                db.collection("busstops").findOne({name: destination}).then(function(ending) {
+                    
+                    var oppDestination = ending.oppBusStop;
+                    
+                    // Source to destination
+                    starting.buses.forEach(function(bus){
 
-                        });
-                    }
-
-                    // Source to opp destination
-                    db.collection("busstops").findOne({name: destination}).then(function(ending) {
-
-                        var oppDestination = ending.oppBusStop;
-
-                        if (oppDestination !== undefined) {
-
-                            starting.buses.forEach(function(bus){
+                        routes = findRouteHandler(bus, routes, source, destination, source, destination);  
+                      
+                    });
+                    
+                    if (oppDestination !== undefined) {
+                        
+                        // Source to opp destination
+                        starting.buses.forEach(function(bus){
                             
-                                routes = findRouteHandler(bus, routes, source, oppDestination);
+                            routes = findRouteHandler(bus, routes, source, oppDestination, source, destination);
+                        
+                        });
+                        
+                    }
+                        
+                    db.collection("busstops").findOne({name: oppSource}).then(function(oppStarting) {
+                        
+                        if (oppSource !== undefined) {
+                    
+                            // Opp source to destination
+                            oppStarting.buses.forEach(function(bus){
+                        
+                                routes = findRouteHandler(bus, routes, oppSource, destination, source, destination);
 
                             });
-
-                            // Opp source to opp destination
-                            db.collection("busstops").findOne({name: oppSource}).then(function(oppStarting) {
-
-                                if (oppSource !== undefined) {
-
-                                    oppStarting.buses.forEach(function(bus){
+                            
+                            if (oppDestination !== undefined) {
+                            
+                                // Opp source to opp destination
+                                oppStarting.buses.forEach(function(bus){
+                                    
+                                    routes = findRouteHandler(bus, routes, oppSource, oppDestination, source, destination);
                                 
-                                        routes = findRouteHandler(bus, routes, oppSource, oppDestination);
-
-                                    });                                    
-
-                                }
-                                console.log(routes);
-                            });
+                                });  
+                                
+                            }
                         }
-
+                        
+                        console.log(routes);
+                    
                     });
 
                 });
                 
             });
+        
         });
+    
     });
+
 }
 
                 
