@@ -107,7 +107,7 @@ module.exports = function(bot){
                             
                             if(rank === 2){possibleRoutes += '\nAlternative route(s):\n';}
                             
-                            possibleRoutes += `${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
+                            possibleRoutes += `${rank-1}. ${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
                             rank++;
 
                         });
