@@ -1,6 +1,6 @@
 const Route = require('../models/route');
 
-module.exports = function(bus, routes, source, destination, s1, d1) {
+module.exports = function(bus, routes, source, destination, s1, d1, description) {
 
     var indexDest1 = bus.busStops.indexOf(destination);
     var indexDest2 = bus.busStops.lastIndexOf(destination);
@@ -32,7 +32,7 @@ module.exports = function(bus, routes, source, destination, s1, d1) {
         
         if(destination !== d1) {
             
-            message = message + `And cross over to ${d1}.`;
+            message = message + ` And cross over to ${d1}.`;
             
         }
             
@@ -40,7 +40,8 @@ module.exports = function(bus, routes, source, destination, s1, d1) {
             bus: bus.name,
             message: message,
             travelTime: travelTime,
-            waitingTime: waitingTime
+            waitingTime: waitingTime,
+            description: description
         }));
         
     }
