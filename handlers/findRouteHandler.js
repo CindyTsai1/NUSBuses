@@ -2,50 +2,60 @@ const Route = require('../models/route');
 
 module.exports = function(bus, routes, source, destination, s1, d1, description) {
 
-    var indexDest1 = bus.busStops.indexOf(destination);
-    var indexDest2 = bus.busStops.lastIndexOf(destination);
-    var indexSource = bus.busStops.indexOf(source);
+    var date = new Date();
+    var time = date.getHours()*100 + date.getMinutes();
 
-    if (indexDest1 > indexSource){
-        indexDestination = indexDest1;
+    if ((bus.name === 'A1E' && (time < 630 || time > 1000)) || 
+        (bus.name === 'A2E' && (time < 1730 || time > 1900)) ||
+        (bus.name === 'C' && (time < 1000))) {
+
+        return routes;
+        
     } else {
-        indexDestination = indexDest2;
-    }
+        var indexDest1 = bus.busStops.indexOf(destination);
+        var indexDest2 = bus.busStops.lastIndexOf(destination);
+        var indexSource = bus.busStops.indexOf(source);
 
-    var numStops = indexDestination - indexSource;
-    
-    //if destination is found and destination is after source
-    if (numStops > 0) {
+        if (indexDest1 > indexSource){
+            indexDestination = indexDest1;
+        } else {
+            indexDestination = indexDest2;
+        }
 
-        //insert arrival time function after its done
-        var waitingTime = Math.floor((Math.random() * 10) + 1);
-
-        var travelTime = waitingTime + 2*numStops;
+        var numStops = indexDestination - indexSource;
         
-        var message = `Take bus ${bus.name} to ${destination}, reaching in ${waitingTime} minutes.`;
-        
-        if (source !== s1) {
+        //if destination is found and destination is after source
+        if (numStops > 0) {
+
+            //insert arrival time function after its done
+            var waitingTime = Math.floor((Math.random() * 10) + 1);
+
+            var travelTime = waitingTime + 2*numStops;
             
-            message = `Cross over to ${source}. ` + message;
+            var message = `Take bus ${bus.name} to ${destination}, reaching in ${waitingTime} minutes.`;
+            
+            if (source !== s1) {
+                
+                message = `Cross over to ${source}. ` + message;
+                
+            }
+            
+            if (destination !== d1) {
+                
+                message = message + ` And cross over to ${d1}.`;
+                
+            }
+                
+            routes.push(new Route({
+                bus: bus.name,
+                message: message,
+                travelTime: travelTime,
+                waitingTime: waitingTime,
+                description: description
+            }));
             
         }
-        
-        if(destination !== d1) {
-            
-            message = message + ` And cross over to ${d1}.`;
-            
-        }
-            
-        routes.push(new Route({
-            bus: bus.name,
-            message: message,
-            travelTime: travelTime,
-            waitingTime: waitingTime,
-            description: description
-        }));
-        
+
+        return routes;
     }
-
-    return routes;
-
 }
