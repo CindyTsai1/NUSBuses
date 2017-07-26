@@ -24,10 +24,11 @@ module.exports = function(bot){
         MongoClient.connect('mongodb://rebstan97:orbitalbus@ds151232.mlab.com:51232/orbitalbot', function(err, db) {
 
             if (err) throw err;
-
-                        
+    
             db.collection("busstops").findOne({name: source}).then(function(starting) {
-                
+
+                var description = starting.description;     
+                console.log(description);
                 var oppSource = starting.oppBusStop;
                 
                 db.collection("busstops").findOne({name: destination}).then(function(ending) {
@@ -37,7 +38,7 @@ module.exports = function(bot){
                     // Source to destination
                     starting.buses.forEach(function(bus){
 
-                        routes = findRouteHandler(bus, routes, source, destination, source, destination);  
+                        routes = findRouteHandler(bus, routes, source, destination, source, destination, description);  
                       
                     });
                     
@@ -46,7 +47,7 @@ module.exports = function(bot){
                         // Source to opp destination
                         starting.buses.forEach(function(bus){
                             
-                            routes = findRouteHandler(bus, routes, source, oppDestination, source, destination);
+                            routes = findRouteHandler(bus, routes, source, oppDestination, source, destination, description);
                         
                         });
                         
@@ -55,11 +56,13 @@ module.exports = function(bot){
                     db.collection("busstops").findOne({name: oppSource}).then(function(oppStarting) {
                         
                         if (oppSource !== undefined) {
+
+                            var oppDescription = oppStarting.description;
                     
                             // Opp source to destination
                             oppStarting.buses.forEach(function(bus){
                         
-                                routes = findRouteHandler(bus, routes, oppSource, destination, source, destination);
+                                routes = findRouteHandler(bus, routes, oppSource, destination, source, destination, oppDescription);
 
                             });
                             
@@ -68,21 +71,51 @@ module.exports = function(bot){
                                 // Opp source to opp destination
                                 oppStarting.buses.forEach(function(bus){
                                     
-                                    routes = findRouteHandler(bus, routes, oppSource, oppDestination, source, destination);
+                                    routes = findRouteHandler(bus, routes, oppSource, oppDestination, source, destination, oppDescription);
                                 
                                 });  
                                 
                             }
                         }
                         
-                        console.log(routes);
+                        var newRoutes = rankRouteHandler(routes);
+
+                        if (newRoutes.length === 0){
+                            ctx.reply('No direct buses available!');
+                            
+                        } else {
+
+                            var possibleRoutes = "";
+                            var rank = 1;
+                            var shortestWait = newRoutes[0].waitingTime;
+                            
+                            newRoutes.forEach(function(route) {
+                                
+                                if(rank === 2){possibleRoutes += '\nAlternative route(s):\n';}
+                                
+                                if(rank >= 2){ possibleRoutes += `${rank-1}. `}
+                                possibleRoutes += `${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
+                                rank++;
+
+                            });
+                            
+                            ctx.reply(possibleRoutes);
+                            
+                            if (shortestWait >= 6) {
+                                ctx.reply('The waiting time is long! \n' + newRoutes[0].description);
+                                
+                            } else if (shortestWait < 6) {
+                                ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
+                            }
+
+                        }
+                                       
+                        db.close(); 
                     
                     });
 
                 });
-                
-                db.close();
-                
+
             });
         
         });
@@ -90,39 +123,3 @@ module.exports = function(bot){
     });
 
 }
-
-                
-/*      REPLACE THE CONSOLE.LOG(); IN THE CODE TO PRINT THE RESULT ON BOT (BRACKETS ARE COUNTED ALREADY)
-                                                                                  
-                    var newRoutes = rankRouteHandler(routes);
-
-                    if (newRoutes.length === 0){
-                        ctx.reply('No direct buses available!');
-                        
-                    } else {
-
-                        var possibleRoutes = "";
-                        var rank = 1;
-                        var shortestWait = newRoutes[0].waitingTime;
-                        
-                        newRoutes.forEach(function(route) {
-                            
-                            if(rank === 2){possibleRoutes += '\nAlternative route(s):\n';}
-                            
-                            possibleRoutes += `${rank-1}. ${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
-                            rank++;
-
-                        });
-                        
-                        ctx.reply(possibleRoutes);
-                        
-                        if (shortestWait >= 6) {
-                            ctx.reply('The waiting time is long! \n' + result.description);
-                            
-                        } else if (shortestWait < 6) {
-                            ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
-                        }
-
-                    }
-
-*/
