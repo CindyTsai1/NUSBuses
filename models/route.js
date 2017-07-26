@@ -7,7 +7,8 @@ const RouteSchema = new Schema({
   bus: String, 
   message: String,
   waitingTime: Number,
-  travelTime: Number
+  travelTime: Number,
+  description: String
 });
 
 const Route = mongoose.model('route', RouteSchema);
