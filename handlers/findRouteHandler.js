@@ -27,22 +27,22 @@ module.exports = function(bus, routes, source, destination, s1, d1, description)
         //if destination is found and destination is after source
         if (numStops > 0) {
 
-            //insert arrival time function after its done
+            //insert arrival time function
             var waitingTime = Math.floor((Math.random() * 10) + 1);
 
             var travelTime = waitingTime + 2*numStops;
             
-            var message = `Take bus ${bus.name} to ${destination}, reaching in ${waitingTime} minutes.`;
+            var message = `🚍 <b>${bus.name}</b>, ${numStops} stops. Coming in <i>${waitingTime} min</i>\n`;
             
             if (source !== s1) {
                 
-                message = `Cross over to ${source}. ` + message;
+                message = `🚶 to ${source}\n` + message;
                 
             }
             
             if (destination !== d1) {
                 
-                message = message + ` And cross over to ${d1}.`;
+                message += `🚶 to ${d1}\n`;
                 
             }
                 
