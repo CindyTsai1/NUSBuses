@@ -28,91 +28,98 @@ module.exports = function(bot){
             db.collection("busstops").findOne({name: source}).then(function(starting) {
 
                 var description = starting.description;     
-                console.log(description);
                 var oppSource = starting.oppBusStop;
-                
+
                 db.collection("busstops").findOne({name: destination}).then(function(ending) {
                     
                     var oppDestination = ending.oppBusStop;
-                    
-                    // Source to destination
-                    starting.buses.forEach(function(bus){
 
-                        routes = findRouteHandler(bus, routes, source, destination, source, destination, description);  
-                      
-                    });
+                    if (oppSource === destination) {
+                        ctx.reply(`Cross the road to ${destination}!`)
+
+                    } else {
                     
-                    if (oppDestination !== undefined) {
-                        
-                        // Source to opp destination
+                        // Source to destination
                         starting.buses.forEach(function(bus){
-                            
-                            routes = findRouteHandler(bus, routes, source, oppDestination, source, destination, description);
+
+                            routes = findRouteHandler(bus, routes, source, destination, source, destination, description);  
                         
                         });
                         
-                    }
-                        
-                    db.collection("busstops").findOne({name: oppSource}).then(function(oppStarting) {
-                        
-                        if (oppSource !== undefined) {
-
-                            var oppDescription = oppStarting.description;
-                    
-                            // Opp source to destination
-                            oppStarting.buses.forEach(function(bus){
-                        
-                                routes = findRouteHandler(bus, routes, oppSource, destination, source, destination, oppDescription);
-
+                        if (oppDestination !== undefined) {
+                            
+                            // Source to opp destination
+                            starting.buses.forEach(function(bus){
+                                
+                                routes = findRouteHandler(bus, routes, source, oppDestination, source, destination, description);
+                            
                             });
                             
-                            if (oppDestination !== undefined) {
+                        }
                             
-                                // Opp source to opp destination
+                        db.collection("busstops").findOne({name: oppSource}).then(function(oppStarting) {
+                            
+                            if (oppSource !== undefined) {
+
+                                var oppDescription = oppStarting.description;
+                        
+                                // Opp source to destination
                                 oppStarting.buses.forEach(function(bus){
+                            
+                                    routes = findRouteHandler(bus, routes, oppSource, destination, source, destination, oppDescription);
+
+                                });
+                                
+                                if (oppDestination !== undefined) {
+                                
+                                    // Opp source to opp destination
+                                    oppStarting.buses.forEach(function(bus){
+                                        
+                                        routes = findRouteHandler(bus, routes, oppSource, oppDestination, source, destination, oppDescription);
                                     
-                                    routes = findRouteHandler(bus, routes, oppSource, oppDestination, source, destination, oppDescription);
-                                
-                                });  
-                                
+                                    });  
+                                    
+                                }
                             }
-                        }
+                            
+                            var newRoutes = rankRouteHandler(routes);
+
+                            if (newRoutes.length === 0){
+                                ctx.reply('No direct buses available!');
+                                
+                            } else {
+
+                                var possibleRoutes = "";
+                                var rank = 1;
+                                var shortestWait = newRoutes[0].waitingTime;
+                                
+                                newRoutes.forEach(function(route) {
+                                    
+                                    if(rank === 2){possibleRoutes += '\nAlternative route(s):\n';}
+                                    
+                                    if(rank >= 2){ possibleRoutes += `\n${rank-1}. `}
+
+                                    possibleRoutes += `${route.message} Total time needed is ${route.travelTime} min!\n`;
+                                    rank++;
+
+                                });
+                                
+                                ctx.replyWithHTML(possibleRoutes);
+                                
+                                if (shortestWait >= 6) {
+                                    ctx.reply('The waiting time is long! \n' + newRoutes[0].description);
+                                    
+                                } else if (shortestWait < 6) {
+                                    ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
+                                }
+
+                            }
+                                        
+                            db.close(); 
                         
-                        var newRoutes = rankRouteHandler(routes);
+                        });
 
-                        if (newRoutes.length === 0){
-                            ctx.reply('No direct buses available!');
-                            
-                        } else {
-
-                            var possibleRoutes = "";
-                            var rank = 1;
-                            var shortestWait = newRoutes[0].waitingTime;
-                            
-                            newRoutes.forEach(function(route) {
-                                
-                                if(rank === 2){possibleRoutes += '\nAlternative route(s):\n';}
-                                
-                                if(rank >= 2){ possibleRoutes += `${rank-1}. `}
-                                possibleRoutes += `${route.message} Total time needed to get to ${destination} is ${route.travelTime} minutes!\n`;
-                                rank++;
-
-                            });
-                            
-                            ctx.reply(possibleRoutes);
-                            
-                            if (shortestWait >= 6) {
-                                ctx.reply('The waiting time is long! \n' + newRoutes[0].description);
-                                
-                            } else if (shortestWait < 6) {
-                                ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
-                            }
-
-                        }
-                                       
-                        db.close(); 
-                    
-                    });
+                    }
 
                 });
 
