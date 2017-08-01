@@ -104,14 +104,16 @@ module.exports = function(bot){
 
                                 });
                                 
-                                ctx.replyWithHTML(possibleRoutes);
-                                
-                                if (shortestWait >= 6) {
+                                ctx.replyWithHTML(possibleRoutes).then(function() {
+
+                                    if (shortestWait >= 6) {
                                     ctx.reply('The waiting time is long! \n' + newRoutes[0].description);
                                     
-                                } else if (shortestWait < 6) {
-                                    ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
-                                }
+                                    } else if (shortestWait < 6) {
+                                        ctx.reply('If you\'re not already there please hurry! The bus is coming real soon... ');
+                                    }
+
+                                });              
 
                             }
                                         
